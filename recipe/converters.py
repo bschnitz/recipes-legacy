@@ -47,30 +47,37 @@ class ChefkochHTMLToRecipe(Converter):
     instructions = [x.strip() for x in instructions if x.strip() != ""]
     return instructions
 
+  def getIngredientFromTableRow(self, tr):
+    fields = tr.find_all("td")
+    amount    = fields[0].text.strip()
+    substance = fields[1].text.strip()
+    return Ingredient(substance, amount)
+
+  def isSectionTitle(self, ingredient):
+    return (
+      ingredient.getAmount() == ''
+      and ingredient.getSubstance().endswith(':')
+    )
+
+  def getSectionTitle(self, ingredient):
+    return ingredient.getSubstance()
+
   def addIngredients(self, soup):
-    ingredients_in = soup \
+    ingredient_table_rows = soup \
       .find(id="recipe-incredients") \
       .find("table") \
       .find_all("tr")
 
-    first_ingredient = ingredients_in[0].find_all("td")
-    amount    = first_ingredient[0].text.strip()
-    substance = first_ingredient[1].text.strip()
-
-    if amount != '':
+    ingredient = self.getIngredientFromTableRow(ingredient_table_rows[0])
+    if not self.isSectionTitle(ingredient):
       self.recipe.addIngredientSection()
 
-    for ingredient in ingredients_in:
-      ingredient = ingredient.find_all("td")
-      amount    = ingredient[0].text.strip()
-      substance = ingredient[1].text.strip()
-      if amount == '':
-        self.recipe.addIngredientSection(substance)
+    for row in ingredient_table_rows:
+      ingredient = self.getIngredientFromTableRow(row)
+      if self.isSectionTitle(ingredient):
+        self.recipe.addIngredientSection(self.getSectionTitle(ingredient))
       else:
-        self.recipe.addIngredient(
-          ingredient[0].text.strip(),
-          ingredient[1].text.strip()
-        )
+        self.recipe.addIngredient(ingredient)
 
   def parseHTML(self, html):
     soup = BeautifulSoup( html, 'html.parser' )

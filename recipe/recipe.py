@@ -16,8 +16,11 @@ class RecipeIngredientSection:
     self.title=title
     self.ingredients = []
 
-  def addIngredient(self, substance, amount):
-    self.ingredients.append(Ingredient(substance, amount))
+  def addIngredient(self, ingredient, amount):
+    if isinstance(ingredient, Ingredient):
+      self.ingredients.append(ingredient)
+    else:
+      self.ingredients.append(Ingredient(Ingredient, amount))
 
   def getTitle(self):
     return self.title
@@ -33,8 +36,8 @@ class RecipeIngredients:
     self.sections.append(RecipeIngredientSection(title))
     return self
 
-  def addIngredient(self, substance, amount):
-    self.sections[-1].addIngredient(substance, amount)
+  def addIngredient(self, ingredient, amount):
+    self.sections[-1].addIngredient(ingredient, amount)
 
   def getSections(self):
     return self.sections
@@ -51,8 +54,8 @@ class Recipe:
   def addIngredientSection(self, title=''):
     self.ingredients.addSection(title)
 
-  def addIngredient(self, amount, substance):
-    self.ingredients.addIngredient(substance, amount)
+  def addIngredient(self, ingredient, amount=''):
+    self.ingredients.addIngredient(ingredient, amount)
 
   def addInstruction(self, instruction):
     self.instructions.append(instruction)
